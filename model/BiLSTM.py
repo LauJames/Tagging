@@ -25,7 +25,7 @@ class BiLSTM(object):
                  hidden_dim, learning_rate):
         self.input_x = tf.placeholder(tf.int32, [None, timestep_size], name='input_x')
         # every char has a tag
-        self.input_y = tf.placeholder(tf.float32, [None, timestep_size], name='input_y')
+        self.input_y = tf.placeholder(tf.int32, [None, timestep_size], name='input_y')
         self.dropout_keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         # Embedding layer 指定在cpu
@@ -45,7 +45,7 @@ class BiLSTM(object):
             cell_bw = tf.contrib.rnn.MultiRNNCell([lstm_cell() for _ in range(num_layers)], state_is_tuple=True)
 
             (output_fw, output_bw), _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, self.embeded_chars, dtype=tf.float32)
-            output = tf.reshape(tf.concat([output_fw, output_bw], axis=-1), [-1, self.hidden_dim * 2])   # concat最高的维度
+            output = tf.reshape(tf.concat([output_fw, output_bw], axis=-1), [-1, hidden_dim * 2])   # concat最高的维度
             output = tf.nn.dropout(output, self.dropout_keep_prob)
 
         with tf.name_scope('score'):
@@ -62,7 +62,7 @@ class BiLSTM(object):
             # prediction
             self.y_pred = tf.argmax(tf.nn.softmax(self.logits), 1)
             """
-            softmax_w = tf.Variable(tf.truncated_normal(shape=[self.hidden_dim * 2, tag_class], stddev=0.1))
+            softmax_w = tf.Variable(tf.truncated_normal(shape=[hidden_dim * 2, tag_class], stddev=0.1))
             softmax_b = tf.Variable(tf.constant(0.1, shape=[tag_class]))
             self.y_pred = tf.matmul(output, softmax_w) + softmax_b
 

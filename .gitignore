@@ -9,3 +9,5 @@ out
 gen
 /data/msr_part.txt
 /data/data.pkl
+/checkpoints/
+/tensorboard_dir/
