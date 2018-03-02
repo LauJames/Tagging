@@ -42,7 +42,7 @@ def join_data(file_path):
     :return: sentences divided by '，。！？、‘’“”' , not by '\r\n'
     """
     # read all data in str type
-    with codecs.open(file_path, encoding='utf-8') as fp:
+    with codecs.open(file_path, encoding='gbk') as fp:
         texts = fp.readlines()
     # sentences = texts.split('\r\n') # cut the texts by \r\n
 
@@ -210,10 +210,10 @@ def batch_iter_per_epoch(x, y, batch_size=64):
 
 
 if __name__ == '__main__':
-    # data = join_data('msr_part.txt')
+    # data = join_data('msr_train.txt')
     # data_list, tags_list = get_words_tags(data)
     # char2id(data_list, tags_list, max_len=32)
-    x_train, y_train, x_valid, y_valid, x_test, y_test = load_data('data.pkl')
+    x_train, y_train, x_valid, y_valid, x_test, y_test = load_data('data.pkl', 0.2, 0.2)
     print('X_train.shape={}, y_train.shape={}; \nX_valid.shape={}, y_valid.shape={};\nX_test.shape={}, y_test.shape={}'.format(x_train.shape, y_train.shape, x_valid.shape, y_valid.shape, x_test.shape, y_test.shape))
 
     """
@@ -238,4 +238,3 @@ if __name__ == '__main__':
     print('长度中位数:' + str(medianList))
     print('1/4分位数、3/4分位数：\n' + str(quantileList))
     """
-

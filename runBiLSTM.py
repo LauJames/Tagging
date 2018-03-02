@@ -135,7 +135,7 @@ def train():
     total_batch = 0  # 总批次
     best_acc_dev = 0.0  # 最佳验证集准确率
     last_improved = 0  # 记录上一次提升批次
-    require_imporvement = 5000  # 如果超过5000论未提升，提前结束训练
+    require_improvement = 5000  # 如果超过5000论未提升，提前结束训练
 
     tag = False
     for epoch in range(FLAGS.num_epochs):
@@ -171,7 +171,7 @@ def train():
             session.run(model.optim, feed_dict=feed_dict)  # 运行优化
             total_batch += 1
 
-            if total_batch - last_improved > require_imporvement:
+            if total_batch - last_improved > require_improvement:
                 # having no improvement for a long time
                 print("No optimization for a long time, auto-stopping...")
                 tag = True
