@@ -151,7 +151,7 @@ def save_data(x, y, word2id, id2word, tag2id, id2tag):
     print(' Finished saving the data.')
 
 
-def load_data(data_path):
+def load_data(data_path, test_pct, dev_pct):
     with open(data_path, 'rb') as inp:
         x = pickle.load(inp)
         y = pickle.load(inp)
@@ -160,15 +160,16 @@ def load_data(data_path):
         tag2id = pickle.load(inp)
         id2tag = pickle.load(inp)
     print('Loading successful!')
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
-    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_pct, random_state=42)
+    x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=dev_pct, random_state=42)
     return x_train, y_train, x_valid, y_valid, x_test, y_test
 
 
 def batch_iter(x, y, batch_size, num_epochs, shuffle=True):
     """
     Generates a batch iterator for a dataset.
-    :param data:
+    :param x:
+    :param y:
     :param batch_size:
     :param num_epochs:
     :param shuffle:
@@ -191,6 +192,21 @@ def batch_iter(x, y, batch_size, num_epochs, shuffle=True):
             start_index = batch_num * batch_size
             end_index = min((batch_num + 1) * batch_size, data_size)
             yield shuffle_x[start_index: end_index], shuffle_y[start_index: end_index]
+
+
+def batch_iter_per_epoch(x, y, batch_size=64):
+    """生成批次数据,每个epoch"""
+    data_len = len(x)
+    num_batch = int((data_len - 1) / batch_size) + 1
+
+    indices = np.random.permutation(np.arange(data_len))
+    x_shuffle = x[indices]
+    y_shuffle = y[indices]
+
+    for i in range(num_batch):
+        start_id = i * batch_size
+        end_id = min((i + 1) * batch_size, data_len)
+        yield x_shuffle[start_id:end_id], y_shuffle[start_id:end_id]
 
 
 if __name__ == '__main__':

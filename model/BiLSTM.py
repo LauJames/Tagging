@@ -49,6 +49,7 @@ class BiLSTM(object):
             output = tf.nn.dropout(output, self.dropout_keep_prob)
 
         with tf.name_scope('score'):
+            """
             # Dense layer, followed a relu activiation layer
             fc = tf.layers.dense(output, self.hidden_dim, name='fc1')
             fc = tf.nn.dropout(fc, keep_prob=self.dropout_keep_prob)
@@ -60,14 +61,18 @@ class BiLSTM(object):
             self.prob = tf.nn.softmax(self.logits)
             # prediction
             self.y_pred = tf.argmax(tf.nn.softmax(self.logits), 1)
+            """
+            softmax_w = tf.Variable(tf.truncated_normal(shape=[self.hidden_dim * 2, tag_class], stddev=0.1))
+            softmax_b = tf.Variable(tf.constant(0.1, shape=[tag_class]))
+            self.y_pred = tf.matmul(output, softmax_w) + softmax_b
 
         with tf.name_scope('loss'):
             # loss
-            cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.input_y)
+            cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.y_pred, labels=tf.reshape(self.input_y, [-1]))
             self.loss = tf.reduce_mean(cross_entropy)
             # optimizer
             self.optim = tf.train.AdamOptimizer(learning_rate).minimize(self.loss)
 
         with tf.name_scope('accuracy'):
-            correct_predictions = tf.equal(self.y_pred, tf.argmax(self.input_y, 1))
+            correct_predictions = tf.equal(tf.cast(tf.argmax(self.y_pred, 1), tf.int32), tf.reshape(self.input_y, [-1]))
             self.accuracy = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
