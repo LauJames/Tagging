@@ -21,10 +21,11 @@ class BiLSTM(object):
     A BiLSTM model for word segmentation
     """
 
-    def __init__(self, sequence_length, tag_class, vocab_size, embedding_dim, num_layers,
+    def __init__(self, timestep_size, tag_class, vocab_size, embedding_dim, num_layers,
                  hidden_dim, learning_rate):
-        self.input_x = tf.placeholder(tf.int32, [None, sequence_length], name='input_x')
-        self.input_y = tf.placeholder(tf.float32, [None, tag_class], name='input_y')
+        self.input_x = tf.placeholder(tf.int32, [None, timestep_size], name='input_x')
+        # every char has a tag
+        self.input_y = tf.placeholder(tf.float32, [None, timestep_size], name='input_y')
         self.dropout_keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         # Embedding layer 指定在cpu
