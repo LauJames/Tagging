@@ -165,7 +165,7 @@ def load_data(data_path, test_pct, dev_pct):
     return x_train, y_train, x_valid, y_valid, x_test, y_test
 
 
-def batch_iter(x, y, batch_size, num_epochs, shuffle=True):
+def batch_iter_eval(x, y, batch_size, num_epochs, shuffle=True):
     """
     Generates a batch iterator for a dataset.
     :param x:
@@ -207,6 +207,31 @@ def batch_iter_per_epoch(x, y, batch_size=64):
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
         yield x_shuffle[start_id:end_id], y_shuffle[start_id:end_id]
+
+
+def batch_iter(data, num_epochs, batch_size=64, shuffle=True):
+    """
+        Generates a batch iterator for a dataset.
+        :param data:
+        :param batch_size:
+        :param num_epochs:
+        :param shuffle:
+        :return:
+        """
+    data = np.array(data)
+    data_size = len(data)
+    num_batch_per_epoch = int((len(data) - 1) / batch_size) + 1
+    for epoch in range(num_epochs):
+        # Shuffle the data at each epoch
+        if shuffle:
+            shuffle_indices = np.random.permutation(np.arange(data_size))
+            shuffle_data = data[shuffle_indices]
+        else:
+            shuffle_data = data
+        for batch_num in range(num_batch_per_epoch):
+            start_index = batch_num * batch_size
+            end_index = min((batch_num + 1) * batch_size, data_size)
+            yield shuffle_data[start_index: end_index]
 
 
 if __name__ == '__main__':

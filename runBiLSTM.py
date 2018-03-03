@@ -20,6 +20,7 @@ import numpy as np
 import tensorflow as tf
 import csv
 from sklearn import metrics
+from sklearn.preprocessing import OneHotEncoder
 from model.BiLSTM import BiLSTM
 from data import dataHelper
 
@@ -82,7 +83,7 @@ def evaluate(x_dev, y_dev, sess):
     :return:
     """
     data_len = len(x_dev)
-    batch_eval = dataHelper.batch_iter(x_dev, y_dev, batch_size=32, num_epochs=1, shuffle=False)
+    batch_eval = dataHelper.batch_iter_eval(x_dev, y_dev, batch_size=32, num_epochs=1, shuffle=False)
     total_loss = 0.0
     total_acc = 0.0
     for x_batch_eval, y_batch_eval in batch_eval:
@@ -196,23 +197,34 @@ def test():
     loss_test, acc_test = evaluate(x_test, y_test, session)
     print('Test loss: {0:>6.2}, Test acc: {1:>7.2%}'.format(loss_test, acc_test))
 
-    x_test_batches = dataHelper.batch_iter(list(x_test), FLAGS.batch_size, 1, shuffle=False)
+    x_test_batches = dataHelper.batch_iter(x_test, batch_size=FLAGS.batch_size, num_epochs=1, shuffle=False)
     all_predictions = []
-    all_predict_prob = []
+    # all_predict_prob = []
     count = 0  # concatenate第一次不能为空，需要加个判断来赋all_predict_prob值
     for x_test_batch in x_test_batches:
-        batch_predictions, batch_predict_prob = session.run([model.y_pred, model.prob],
-                                                            feed_dict={
+        batch_predictions = session.run(model.y_pred, feed_dict={
                                                                 model.input_x: x_test_batch,
                                                                 model.dropout_keep_prob: 1.0
                                                             })
-        all_predictions = np.concatenate([all_predictions, batch_predictions])
-        if count == 0:
-            all_predict_prob = batch_predict_prob
-        else:
-            all_predict_prob = np.concatenate([all_predict_prob, batch_predict_prob])
-        count = 1
+        # all_predictions = np.concatenate([all_predictions, batch_predictions])
 
+        if count == 0:
+            all_predictions = batch_predictions
+        else:
+            all_predictions = np.concatenate([all_predictions, batch_predictions])
+        count = 1
+    print(all_predictions.shape)
+    print(y_test.shape)
+    """
+    # One hot encoding
+    # ohe = OneHotEncoder()
+    # ohe.fit([[0], [1], [2], [3], [4]])
+    # y_test_onehot = ohe.transform(y_test.reshape(-1, 1)).toarray()
+    """
+    all_predictions = np.argmax(all_predictions, axis=1)
+    print(all_predictions.shape)
+    y_test = y_test.reshape(-1)
+    print(y_test.shape)
     # Evaluation indexes
     # y_test = np.argmax(y_test, axis=1)
     print("Precision, Recall, F1-Score ...")
