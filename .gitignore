@@ -11,3 +11,4 @@ gen
 /data/data.pkl
 /checkpoints/
 /tensorboard_dir/
+/data/utest.py
