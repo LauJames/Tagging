@@ -233,6 +233,9 @@ def test():
     print("Confusion Matrix ...")
     print(metrics.confusion_matrix(y_test, all_predictions))
 
+    print("One example of word segmentation:")
+    print("")
+
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
 
