@@ -65,9 +65,7 @@ def reorganized_data(sentence):
     words = list()
     for sentence in sentences:
         print(sentence + '\n')
-        for word in sentence:
-            words.append(word)
-    return sentences, words
+    return sentences
 
 
 if __name__ == "__main__":
@@ -101,29 +99,30 @@ if __name__ == "__main__":
     saver.restore(session, save_path='checkpoints/BiLSTM/best_validation')
 
     test = '人们常说，生活是一部教科书。'
-    x_test_raw, words = reorganized_data(test)
+    x_test_raw = reorganized_data(test)
     textID = list()
     sentenceID = list()
     for text in x_test_raw:
-        for word in text:
-            textID.append(word2id(word))
-        sentenceID.append(x_padding(textID))
-        textID = list()
-    sentenceID = np.asarray(sentenceID)
-
-    predict = session.run(model.y_pred, feed_dict={
-        model.input_x: sentenceID,
-        model.dropout_keep_prob: 1.0
-    })
-    #
-    pre_id = np.argmax(predict, axis=1)
-    tags = list()
-    for id in pre_id:
-        tags.append(id2tag(id))
-    rss = ''
-    for i in range(len(tags)):
-        if tags[i] in ['s', 'e']:
-            rss = rss + words[i] + ' '
-        else:
-            rss = rss + words[i]
-    print(rss)
+        if text:
+            text_len = len(text)
+            words = list()
+            for word in text:
+                textID.append(word2id(word))
+                words.append(word)
+            textID = np.asarray(textID)
+            predict = session.run(model.y_pred, feed_dict={
+                model.input_x: sentenceID,
+                model.dropout_keep_prob: 1.0
+            })
+            textID = list()
+            predict_tags = np.argmax(predict, axis=1)[:text_len]  # padding部分直接丢弃
+            tags = list()
+            for id in predict_tags:
+                tags.append(id2tag(id))
+            rss = ''
+            for i in range(len(tags)):
+                if tags[i] in ['s', 'e']:
+                    rss = rss + words[i] + ' '
+                else:
+                    rss = rss + words[i]
+            print(rss)
