@@ -49,6 +49,7 @@ def word2id(word):
         id2tag = pickle.load(inp)
     return word2id[word]
 
+
 def id2tag(id):
     with open('./data/data.pkl', 'rb') as inp:
         x = pickle.load(inp)
@@ -101,7 +102,6 @@ if __name__ == "__main__":
     test = '人们常说，生活是一部教科书。'
     x_test_raw = reorganized_data(test)
     textID = list()
-    sentenceID = list()
     for text in x_test_raw:
         if text:
             text_len = len(text)
@@ -109,9 +109,9 @@ if __name__ == "__main__":
             for word in text:
                 textID.append(word2id(word))
                 words.append(word)
-            textID = np.asarray(textID)
+            textID = np.asarray(x_padding(textID)).reshape(-1, 32)
             predict = session.run(model.y_pred, feed_dict={
-                model.input_x: sentenceID,
+                model.input_x: textID,
                 model.dropout_keep_prob: 1.0
             })
             textID = list()
