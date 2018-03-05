@@ -49,6 +49,16 @@ def word2id(word):
         id2tag = pickle.load(inp)
     return word2id[word]
 
+def id2tag(id):
+    with open('./data/data.pkl', 'rb') as inp:
+        x = pickle.load(inp)
+        y = pickle.load(inp)
+        word2id = pickle.load(inp)
+        id2word = pickle.load(inp)
+        tag2id = pickle.load(inp)
+        id2tag = pickle.load(inp)
+    return id2tag[id]
+
 
 def reorganized_data(sentence):
     sentences = re.split(u'[，。！？、‘’“”]', sentence)
@@ -106,4 +116,14 @@ if __name__ == "__main__":
         model.dropout_keep_prob: 1.0
     })
     #
-    print(predict)
+    pre_id = np.argmax(predict, axis=1)
+    tags = list()
+    for id in pre_id:
+        tags.append(id2tag(id))
+    rss = ''
+    for i in range(len(tags)):
+        if tags[i] in ['s', 'e']:
+            rss = rss + words[i] + ' '
+        else:
+            rss = rss + words[i]
+    print(rss)
